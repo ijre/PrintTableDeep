@@ -1,0 +1,13 @@
+{
+  "name": "Print Table Deep",
+  "description": "Print tables and their contents to the log, including nested tables",
+  "author": "ijre",
+  "undisablable": true,
+  "is_library": true,
+  "hooks": [
+    {
+      "hook_id": "core/lib/system/coresystem",
+      "script_path": "main.lua"
+    }
+  ]
+}
