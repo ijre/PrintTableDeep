@@ -103,7 +103,7 @@ function PrintTableDeep(tbl, maxDepth, customNameForInitialLog, skipFunctions, a
 
         loopDepth = loopDepth + 1
 
-        PrintTableDeep(v, maxDepth, skipFunctions, allowLogHeavyTables, tablesToIgnore)
+        PrintTableDeep(v, maxDepth, nil, skipFunctions, allowLogHeavyTables, tablesToIgnore)
 
         loopDepth = loopDepth - 1
 
