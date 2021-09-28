@@ -4,10 +4,21 @@
   "author": "ijre",
   "undisablable": true,
   "is_library": true,
-  "hooks": [
+  "hooks":
+  [
     {
       "hook_id": "core/lib/system/coresystem",
       "script_path": "main.lua"
+    }
+  ],
+  "updates":
+  [
+    {
+      "identifier": "PrintTableDeep",
+      "host":
+      {
+        "meta": "https://github.com/ijre/PrintTableDeep/releases/download/PrintTableDeep/meta.json"
+      }
     }
   ]
 }
