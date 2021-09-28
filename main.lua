@@ -8,6 +8,18 @@ local function GetIndentStrings(indents)
   return buffer
 end
 
+local function GetLogFormat(ind, input, value)
+  local str = ind
+
+  if type(value) ~= "table" then
+    str = str .. string.format("\"%s\" = %s", input, value)
+  else
+    str = str .. string.format("[\"%s\"] = table", input)
+  end
+
+  return str
+end
+
 local function CheckIfSafe(name, allowLogHeavyTables)
   local alwaysBlock =
   {
@@ -27,18 +39,6 @@ local function CheckIfSafe(name, allowLogHeavyTables)
   local reason = table.contains(alwaysBlock, name) and "always" or (not allowLogHeavyTables and table.contains(unsafeTables, name)) and "unsafe" or nil
 
   return reason == nil, reason
-end
-
-local function GetLogFormat(ind, input, value)
-  local str = ind
-
-  if type(value) ~= "table" then
-    str = str .. string.format("\"%s\" = %s", input, value)
-  else
-    str = str .. string.format("[\"%s\"] = table", input)
-  end
-
-  return str
 end
 
 local function SetParamDefaults(depth, func, log, ignore)
