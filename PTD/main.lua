@@ -64,6 +64,24 @@ local function SetParamDefaults(depth, log, ignore, func)
   return depth, log, ignore, func
 end
 
+local tableList = { }
+tableList.Names = { }
+tableList.Addresses = { }
+-- it's a table table O.O
+
+local function RemoveRawTextFromAddress(text)
+  if string.sub(text, 1, 1) == "t" then -- indicates raw tostring() text
+    return string.sub(text, 7) -- length of raw text ("table: ")
+  end
+end
+
+local function AppendTableList(nameData, depth)
+  depth = depth > 0 and depth or 1
+
+  table.insert(tableList.Names, depth, nameData[1])
+  table.insert(tableList.Addresses, depth, RemoveRawTextFromAddress(nameData[2]))
+end
+
 local loopDepth = 0
 local uniqueCall = true
 
@@ -82,6 +100,7 @@ function PrintTableDeep(tbl, maxDepth, allowLogHeavyTables, customNameForInitial
 
   if loopDepth == 0 and uniqueCall then
     local initTableName = customNameForInitialLog or tostring(tbl)
+    AppendTableList({ "", tostring(tbl) }, 1)
 
     log("PTD: Now printing: " .. initTableName)
     log("{")
@@ -93,11 +112,32 @@ function PrintTableDeep(tbl, maxDepth, allowLogHeavyTables, customNameForInitial
     local logSTR = GetLogFormat(ind, k, v)
 
     if type(v) == "table" then
-      local hasValues = table.size(v) > 0
-      local isSafe, reason = CheckIfSafe(tostring(k), allowLogHeavyTables)
-      local ignoreTable = table.get_key(tablesToIgnore, tostring(k))
+      local strK = tostring(k)
+      local strV = tostring(v)
 
-      if loopDepth < maxDepth and hasValues and isSafe and not ignoreTable then
+      local hasValues = table.size(v) > 0
+      local isSafe, reason = CheckIfSafe(strK, allowLogHeavyTables)
+      local ignoreTable = table.get_key(tablesToIgnore, strK)
+
+      local function checkIfRecursive(tableToCheck)
+        for nestK, nestV in pairs(tableToCheck) do
+          if type(nestV) == "table" then
+            local addressIndex = table.index_of(tableList.Addresses, RemoveRawTextFromAddress(tostring(nestV)))
+
+            if addressIndex ~= -1 and addressIndex - 1 < loopDepth then
+              return true
+            end
+          end
+        end
+
+        return false
+      end
+
+      local containsOwnParent = checkIfRecursive(v)
+
+      if loopDepth < maxDepth and hasValues and isSafe and not ignoreTable and not containsOwnParent then
+        AppendTableList({ strK, strV }, loopDepth + 1)
+
         log(logSTR)
         log(ind .. "{")
 
@@ -120,6 +160,8 @@ function PrintTableDeep(tbl, maxDepth, allowLogHeavyTables, customNameForInitial
         end
       elseif ignoreTable then
         logSTR = logSTR .. " { [table blocked by tablesToIgnore param] }"
+      elseif containsOwnParent then
+        logSTR = string.format("%s { [table blocked to stop recursive loop (\"%s\" contains \"%s\" which contains \"%s\")] }", logSTR, strK, tableList.Names[loopDepth], strK)
       end
     end
 

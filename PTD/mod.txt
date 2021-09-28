@@ -1,7 +1,8 @@
 {
   "name": "Print Table Deep",
-  "description": "Print tables and their contents to the log, including nested tables",
+  "description": "Print tables and all their contents to your log/console, including nested tables.",
   "author": "ijre",
+  "version": "1.1.0",
   "undisablable": true,
   "is_library": true,
   "hooks":
