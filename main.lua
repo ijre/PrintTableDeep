@@ -41,13 +41,9 @@ local function CheckIfSafe(name, allowLogHeavyTables)
   return reason == nil, reason
 end
 
-local function SetParamDefaults(depth, func, log, ignore)
+local function SetParamDefaults(depth, log, ignore, func)
   if not depth or depth <= 0 then
     depth = 1
-  end
-
-  if func == nil then
-    func = true
   end
 
   if log == nil then
@@ -61,7 +57,11 @@ local function SetParamDefaults(depth, func, log, ignore)
     ignore = { }
   end
 
-  return depth, func, log, ignore
+  if func == nil then
+    func = true
+  end
+
+  return depth, log, ignore, func
 end
 
 local loopDepth = 0
@@ -69,16 +69,16 @@ local uniqueCall = true
 
 ---@param tbl table
 ---@param maxDepth? integer
----@param customNameForInitialLog? string
----@param skipFunctions? boolean
 ---@param allowLogHeavyTables? boolean
+---@param customNameForInitialLog? string
 ---@param tablesToIgnore? table|string
-function PrintTableDeep(tbl, maxDepth, customNameForInitialLog, skipFunctions, allowLogHeavyTables, tablesToIgnore)
+---@param skipFunctions? boolean
+function PrintTableDeep(tbl, maxDepth, allowLogHeavyTables, customNameForInitialLog, tablesToIgnore, skipFunctions)
   if type(tbl) ~= "table" then
     log(tostring(tbl))
   return end
 
-  maxDepth, skipFunctions, allowLogHeavyTables, tablesToIgnore = SetParamDefaults(maxDepth, skipFunctions, allowLogHeavyTables, tablesToIgnore)
+  maxDepth, allowLogHeavyTables, tablesToIgnore, skipFunctions = SetParamDefaults(maxDepth, allowLogHeavyTables, tablesToIgnore, skipFunctions)
 
   if loopDepth == 0 and uniqueCall then
     local initTableName = customNameForInitialLog or tostring(tbl)
@@ -103,7 +103,7 @@ function PrintTableDeep(tbl, maxDepth, customNameForInitialLog, skipFunctions, a
 
         loopDepth = loopDepth + 1
 
-        PrintTableDeep(v, maxDepth, nil, skipFunctions, allowLogHeavyTables, tablesToIgnore)
+        PrintTableDeep(v, maxDepth, allowLogHeavyTables, nil, tablesToIgnore, skipFunctions)
 
         loopDepth = loopDepth - 1
 
